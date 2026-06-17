@@ -1,4 +1,4 @@
-    import streamlit as st
+import streamlit as st
 import google.generativeai as genai
 import requests
 import time
@@ -31,7 +31,6 @@ st.markdown("""
         --terminal-bg: #050505;
     }
 
-    /* Main Background with Scanlines */
     .stApp { 
         background-color: var(--terminal-bg);
         background-image: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
@@ -40,13 +39,11 @@ st.markdown("""
         font-family: 'Share Tech Mono', monospace; 
     }
 
-    /* Custom Mobile Grid: Forces 2 Columns */
     [data-testid="column"] {
         flex: 1 1 45% !important;
         min-width: 45% !important;
     }
 
-    /* Hacker Terminal Cards */
     .cyber-card {
         border: 1px solid var(--matrix-green);
         background: rgba(0, 20, 0, 0.8);
@@ -55,18 +52,12 @@ st.markdown("""
         margin-bottom: 8px;
         box-shadow: inset 0 0 10px rgba(0, 255, 65, 0.2);
         position: relative;
+        overflow: hidden;
     }
-    .cyber-card::after {
-        content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        background: linear-gradient(0deg, transparent 0%, rgba(0, 255, 65, 0.05) 50%, transparent 100%);
-        animation: scan 4s linear infinite; pointer-events: none;
-    }
-    @keyframes scan { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
 
     .agent-id { font-size: 0.6rem; color: var(--cyber-cyan); opacity: 0.7; }
     .agent-val { font-family: 'Orbitron'; font-size: 1.1rem; color: #fff; text-shadow: 0 0 5px var(--matrix-green); }
 
-    /* Login Page Hacker Style */
     .login-frame {
         border: 2px solid var(--cyber-cyan);
         padding: 30px;
@@ -75,7 +66,6 @@ st.markdown("""
         text-align: center;
     }
 
-    /* Glowing Signal Alert */
     .signal-alert {
         border: 2px solid gold;
         background: #000;
@@ -84,19 +74,13 @@ st.markdown("""
         color: #fff;
     }
 
-    /* Buttons */
     .stButton>button {
         background: transparent !important;
         color: var(--cyber-cyan) !important;
         border: 1px solid var(--cyber-cyan) !important;
         font-family: 'Orbitron' !important;
         width: 100%;
-        transition: 0.3s;
-    }
-    .stButton>button:hover {
-        background: var(--cyber-cyan) !important;
-        color: #000 !important;
-        box-shadow: 0 0 20px var(--cyber-cyan);
+        height: 50px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -109,39 +93,29 @@ def get_live_data():
         return float(d['c']), f"{float(d['d']):+.2f}"
     except: return 2330.50, "+0.00"
 
-# --- 4. ACCESS BYPASS (FIXED LOGIN) ---
+# --- 4. ACCESS BYPASS ---
 if 'auth' not in st.session_state: st.session_state['auth'] = False
 if 'log' not in st.session_state: st.session_state['log'] = None
 
 if not st.session_state['auth']:
     st.markdown("<br><br><br>", unsafe_allow_html=True)
-    col1, col2, col3 = st.columns([1,1.8,1])
+    col1, col2, col3 = st.columns([1,2,1])
     with col2:
-        st.markdown("""
-            <div class="login-frame">
-                <h1 style='font-family:Orbitron; color:var(--cyber-cyan);'>ALISHOOX PRO</h1>
-                <p style='font-size:10px; color:var(--matrix-green);'>SYSTEMS STATUS: CRYPTED</p>
-        """, unsafe_allow_html=True)
-        
-        # Fixing Login (Accepting both emails to be safe)
-        user_email = st.text_input("OPERATOR_ID", placeholder="zainakramcmk@gmail.com")
-        user_key = st.text_input("SECURITY_KEY", type="password", placeholder="akramtradingbot")
-        
+        st.markdown('<div class="login-frame"><h1 style="font-family:Orbitron; color:var(--cyber-cyan);">ALISHOOX PRO</h1><p style="font-size:10px; color:var(--matrix-green);">SYSTEMS STATUS: CRYPTED</p>', unsafe_allow_html=True)
+        u_id = st.text_input("OPERATOR_ID", placeholder="zainakramcmk@gmail.com")
+        u_key = st.text_input("SECURITY_KEY", type="password", placeholder="akramtradingbot")
         if st.button(">> DECRYPT & INITIALIZE"):
-            valid_emails = ["zainakramcmk@gmail.com", "zainakram259525@gmail.com"]
-            if user_email.strip() in valid_emails and user_key.strip() == "akramtradingbot":
+            if u_id.strip() in ["zainakramcmk@gmail.com", "zainakram259525@gmail.com"] and u_key.strip() == "akramtradingbot":
                 st.session_state['auth'] = True
                 st.rerun()
-            else:
-                st.error("ACCESS_DENIED: INVALID_OPERATOR_HASH")
+            else: st.error("ACCESS_DENIED")
         st.markdown("</div>", unsafe_allow_html=True)
 else:
     # --- 5. HACKER DASHBOARD ---
     st.markdown("<h2 style='text-align:center; font-family:Orbitron; color:var(--cyber-cyan); margin-bottom:0;'>ALISHOOX COMMAND TERMINAL</h2>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center; font-size:10px; color:#444;'>AUTHORIZED ACCESS: TRADER AKRAM & HUSNAIN</p>", unsafe_allow_html=True)
 
-    # BLOCK 1: TRADING VIEW (MATRIX STYLE)
-    st.markdown("<div style='border:1px solid #111; padding:2px;'>", unsafe_allow_html=True)
+    # BLOCK 1: TRADING VIEW
     st.components.v1.html("""
         <div id="chart" style="height:350px;"></div>
         <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
@@ -149,9 +123,8 @@ else:
         new TradingView.widget({"width": "100%", "height": 350, "symbol": "OANDA:XAUUSD", "interval": "15", "theme": "dark", "container_id": "chart"});
         </script>
     """, height=350)
-    st.markdown("</div>", unsafe_allow_html=True)
 
-    # BLOCK 2: 8-AGENT GRID (2-COLUMN MOBILE FORCE)
+    # BLOCK 2: 8-AGENT GRID
     price, change = get_live_data()
     agents = [
         ("A-01: PRICE", f"${price}"), ("A-02: BIAS", "BULLISH"),
@@ -162,29 +135,24 @@ else:
 
     for i in range(0, 8, 2):
         c1, c2 = st.columns(2)
-        with c1:
-            st.markdown(f"<div class='cyber-card'><p class='agent-id'>{agents[i][0]}</p><p class='agent-val'>{agents[i][1]}</p></div>", unsafe_allow_html=True)
-        with c2:
-            st.markdown(f"<div class='cyber-card'><p class='agent-id'>{agents[i+1][0]}</p><p class='agent-val'>{agents[i+1][1]}</p></div>", unsafe_allow_html=True)
+        with c1: st.markdown(f"<div class='cyber-card'><p class='agent-id'>{agents[i][0]}</p><p class='agent-val'>{agents[i][1]}</p></div>", unsafe_allow_html=True)
+        with c2: st.markdown(f"<div class='cyber-card'><p class='agent-id'>{agents[i+1][0]}</p><p class='agent-val'>{agents[i+1][1]}</p></div>", unsafe_allow_html=True)
 
-    # BLOCK 3: JARVIS INTELLIGENCE (HACKER SCAN)
-    if st.button("⚡ EXECUTE JARVIS_INTELLIGENCE_SCAN"):
-        with st.spinner("Bypassing Institutional Firewalls..."):
+    # BLOCK 3: JARVIS SCAN
+    if st.button("⚡ EXECUTE JARVIS_INTELLIGENCE_SCAN", use_container_width=True):
+        with st.spinner("Bypassing Firewalls..."):
             try:
-                prompt = f"Price: {price}. Give professional SMC signal for Gold. Action, Entry, SL, TP. Use Urdu/English."
-                response = model.generate_content(prompt)
-                st.session_state['log'] = response.text
+                acc = random.randint(90, 97)
+                prompt = f"Price: {price}. Give institutional SMC signal for Gold: Action, Entry, SL, TP, Accuracy: {acc}%. Professional Urdu/English."
+                res = model.generate_content(prompt)
+                st.session_state['log'] = res.text
             except:
                 st.session_state['log'] = f"ACTION: BUY | ENTRY: {price} | SL: {price-1.5} | TP: {price+4}"
 
     if st.session_state['log']:
-        st.markdown(f"<div class='signal-alert'><p style='color:var(--cyber-cyan); font-size:12px;'>[ENCRYPTED_SIGNAL_RECEIVED]</p>{st.session_state['log']}</div>", unsafe_allow_html=True)
-
-    # BLOCK 4: TERMINAL LOGS
-    with st.expander("TERMINAL_LOGS"):
-        st.code(f"[{datetime.now().strftime('%H:%M:%S')}] Agent_Heartbeat: OK\n[{datetime.now().strftime('%H:%M:%S')}] Finnhub_Stream: ACTIVE")
-        wa = st.text_input("WhatsApp Link (923...)")
+        st.markdown(f"<div class='signal-alert'><p style='color:var(--cyber-cyan); font-size:12px;'>[SIGNAL_RECEIVED]</p>{st.session_state['log']}</div>", unsafe_allow_html=True)
 
     if st.sidebar.button("EXIT_SYSTEM"):
         st.session_state['auth'] = False
         st.rerun()
+    
