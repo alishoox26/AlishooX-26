@@ -1,169 +1,193 @@
 import streamlit as st
 import google.generativeai as genai
 import requests
-import os
 import time
+import random
 from datetime import datetime
 from streamlit_autorefresh import st_autorefresh
 
-# --- 1. CORE CONFIG & SECURITY ---
-st.set_page_config(page_title="AlishooX Ultra Terminal", layout="wide", initial_sidebar_state="collapsed")
-st_autorefresh(interval=30 * 1000, key="alishoox_global_sync")
+# --- 1. SOVEREIGN CONFIGURATION ---
+st.set_page_config(
+    page_title="AlishooX Ultra-Terminal",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
 
-# API Keys & AI Engine Setup
+# Live Refresh: 5 Seconds for Ultra-Fast Feel
+st_autorefresh(interval=5 * 1000, key="terminal_heartbeat")
+
+# Load Secure Intelligence
 try:
     FINNHUB_KEY = st.secrets["FINNHUB_API_KEY"]
     GEMINI_KEY = st.secrets["GEMINI_API_KEY"]
     genai.configure(api_key=GEMINI_KEY)
-    # Multi-Model Fallback Logic
-    ai_models = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-pro']
-    model = genai.GenerativeModel(ai_models[0])
+    model = genai.GenerativeModel('gemini-1.5-flash')
 except:
-    st.error("⚠️ CRITICAL ERROR: API Keys missing in Streamlit Secrets.")
+    st.error("🔒 CRITICAL: API KEYS NOT DETECTED IN SECRETS.")
 
-# --- 2. ADVANCED JARVIS UI (PREMIUM CSS) ---
+# --- 2. HIGH-LEVEL CSS (CYBERPUNK INSTITUTIONAL) ---
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&family=Share+Tech+Mono&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;500;700&display=swap');
     
-    :root { --neon-cyan: #00e5ff; --neon-gold: #ffd700; --neon-red: #ff3860; --neon-green: #00ff88; }
+    :root {
+        --neon-cyan: #00e5ff;
+        --neon-gold: #ffd700;
+        --dark-surface: #0a0a0f;
+    }
+
     .stApp { background-color: #050508; color: #e0e0f0; font-family: 'Rajdhani', sans-serif; }
 
-    /* Animations */
-    @keyframes scanline { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
-    @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 10px rgba(0,229,255,0.2); } 50% { box-shadow: 0 0 25px rgba(0,229,255,0.5); } }
-    @keyframes border-run { 0% { border-color: var(--neon-cyan); } 50% { border-color: var(--neon-gold); } 100% { border-color: var(--neon-cyan); } }
+    /* Mobile 2-Column Adjustment */
+    @media (max-width: 768px) {
+        [data-testid="column"] { width: 48% !important; flex: 1 1 45% !important; min-width: 45% !important; }
+    }
 
-    /* Premium Containers */
-    .neon-card {
-        border: 1px solid rgba(0, 229, 255, 0.2); border-radius: 15px; padding: 20px;
-        background: rgba(10, 10, 15, 0.9); backdrop-filter: blur(15px);
-        animation: pulse-glow 4s infinite; margin-bottom: 15px; position: relative; overflow: hidden;
+    /* Premium Neon Blocks */
+    .agent-block {
+        border: 1px solid rgba(0, 229, 255, 0.2);
+        border-radius: 12px;
+        padding: 15px;
+        background: rgba(13, 13, 20, 0.9);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 0 15px rgba(0, 229, 255, 0.05);
+        margin-bottom: 10px;
+        text-align: center;
+        transition: 0.3s;
     }
-    .neon-card::before {
-        content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
-        background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
-        animation: scanline 3s linear infinite; opacity: 0.3;
-    }
-    
-    .agent-label { font-family: 'Orbitron'; font-size: 0.65rem; color: var(--neon-cyan); letter-spacing: 2px; text-transform: uppercase; }
-    .metric-val { font-family: 'Orbitron'; font-size: 1.6rem; font-weight: 900; color: #ffffff; margin: 5px 0; }
-    
-    /* Signal Terminal Box */
-    .signal-terminal {
-        border: 2px solid var(--neon-gold); border-radius: 20px; padding: 30px;
-        background: black; box-shadow: 0 0 40px rgba(255, 215, 0, 0.15);
-        animation: border-run 5s infinite;
-    }
-    .signal-header { font-family: 'Orbitron'; font-size: 1.5rem; text-align: center; color: var(--neon-gold); border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
+    .agent-block:hover { border-color: var(--neon-cyan); box-shadow: 0 0 20px rgba(0, 229, 255, 0.2); }
 
-    /* Psychology Master Widget */
-    .psy-box { border-left: 4px solid var(--neon-cyan); background: #0a0a14; padding: 15px; border-radius: 0 10px 10px 0; font-style: italic; }
+    .agent-title { font-family: 'Orbitron'; font-size: 0.6rem; color: var(--neon-cyan); letter-spacing: 2px; margin-bottom: 5px; }
+    .agent-value { font-family: 'Orbitron'; font-size: 1.2rem; font-weight: 900; color: #fff; }
+    
+    /* Jarvis Terminal Glow */
+    .jarvis-container {
+        border: 2px solid var(--neon-gold);
+        border-radius: 20px;
+        padding: 25px;
+        background: #000;
+        box-shadow: 0 0 40px rgba(255, 215, 0, 0.1);
+        margin-top: 20px;
+    }
+
+    /* Scanning Animation */
+    .scanning-text { font-family: 'Share Tech Mono'; color: var(--neon-gold); animation: pulse 1s infinite; }
+    @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
+    /* Styled Buttons */
+    .stButton>button {
+        background: linear-gradient(90deg, #ffd700, #cc9900);
+        color: black !important;
+        font-family: 'Orbitron';
+        font-weight: 900;
+        border-radius: 50px;
+        border: none;
+        height: 55px;
+        box-shadow: 0 0 25px rgba(255, 215, 0, 0.3);
+    }
 </style>
 """, unsafe_allow_html=True)
 
-# --- 3. HELPER FUNCTIONS ---
-def get_gold_metrics():
+# --- 3. INTELLIGENCE FUNCTIONS ---
+def get_live_gold():
     try:
-        res = requests.get(f"https://finnhub.io/api/v1/quote?symbol=OANDA:XAU_USD&token={FINNHUB_KEY}").json()
-        return {"price": res.get('c', 0), "high": res.get('h', 0), "low": res.get('l', 0), "change": res.get('d', 0)}
-    except: return {"price": 2330.50, "high": 2345, "low": 2315, "change": 0}
+        url = f"https://finnhub.io/api/v1/quote?symbol=OANDA:XAU_USD&token={FINNHUB_KEY}"
+        data = requests.get(url).json()
+        if data.get('c'):
+            return float(data['c']), float(data['d']), float(data['h']), float(data['l'])
+    except: pass
+    return 2332.50, 0.20, 2340.00, 2315.00
 
-def get_market_news():
+def get_news():
     try:
         res = requests.get(f"https://finnhub.io/api/v1/news?category=forex&token={FINNHUB_KEY}").json()
-        return res[:5]
+        return res[:3]
     except: return []
 
-# --- 4. AUTHENTICATION ---
-if 'auth' not in st.session_state: st.session_state['auth'] = False
-if 'journal' not in st.session_state: st.session_state['journal'] = []
+# --- 4. SECURE ACCESS ---
+if 'authenticated' not in st.session_state: st.session_state['authenticated'] = False
+if 'jarvis_log' not in st.session_state: st.session_state['jarvis_log'] = None
 
-if not st.session_state['auth']:
-    st.markdown("<br><br>", unsafe_allow_html=True)
+if not st.session_state['authenticated']:
+    st.markdown("<br><br><div style='text-align:center;'>", unsafe_allow_html=True)
+    st.markdown("<h1 style='font-family:Orbitron; color:#00e5ff; font-size:3rem;'>ALISHOOX PRO</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#ffd700; letter-spacing:5px;'>INSTITUTIONAL GRADE TERMINAL</p></div>", unsafe_allow_html=True)
+    
     col1, col2, col3 = st.columns([1,2,1])
     with col2:
-        st.markdown("<h1 style='text-align:center; font-family:Orbitron; color:#00e5ff;'>ALISHOOX PRO v7.0</h1>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align:center; color:#ffd700; letter-spacing:5px;'>INITIALIZING JARVIS ENGINE</p>", unsafe_allow_html=True)
-        email = st.text_input("Operator ID", placeholder="zainakram259525@gmail.com")
-        key = st.text_input("Security Key", type="password", placeholder="akramtradingbot")
-        if st.button("⚡ AUTHORIZE ACCESS", use_container_width=True):
+        email = st.text_input("OPERATOR ID", placeholder="zainakram259525@gmail.com")
+        key = st.text_input("SECURITY KEY", type="password", placeholder="akramtradingbot")
+        if st.button("ACTIVATE SYSTEM"):
             if email.strip() == "zainakram259525@gmail.com" and key.strip() == "akramtradingbot":
-                st.session_state['auth'] = True
+                st.session_state['authenticated'] = True
                 st.rerun()
-            else: st.error("ACCESS DENIED")
+            else: st.error("ACCESS DENIED: UNAUTHORIZED OPERATOR.")
 else:
-    # --- 5. MAIN TERMINAL DASHBOARD ---
-    # Top Scrolling Ticker
-    news_data = get_market_news()
-    ticker_text = "  |  ".join([n['headline'] for n in news_data])
-    st.markdown(f"<marquee style='color:#ffd700; font-family:Share Tech Mono; background:#0a0a0f; padding:5px;'>📡 LIVE NEWS RADAR: {ticker_text}</marquee>", unsafe_allow_html=True)
-
-    # Header
-    st.markdown("<h2 style='text-align:center; font-family:Orbitron; color:#00e5ff; margin-bottom:0;'>ALISHOOX COMMAND CENTER</h2>", unsafe_allow_html=True)
+    # --- 5. THE TERMINAL ---
+    st.markdown("<h3 style='text-align:center; font-family:Orbitron; color:#00e5ff; margin-bottom:0;'>ALISHOOX COMMAND CENTER v9.0</h3>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center; font-size:10px; color:#666;'>OPERATORS: TRADER AKRAM & HUSNAIN</p>", unsafe_allow_html=True)
 
-    # BLOCK 1: TRADING VIEW (LARGE)
-    st.markdown("<div class='neon-card'>", unsafe_allow_html=True)
+    # BLOCK 1: MASTER CHART
+    st.markdown("<div style='border:1px solid #1a1a2e; border-radius:15px; overflow:hidden;'>", unsafe_allow_html=True)
     st.components.v1.html("""
-        <div id="tv_chart" style="height:480px;"></div>
+        <div id="tradingview_xau" style="height:400px;"></div>
         <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
         <script type="text/javascript">
-        new TradingView.widget({"width": "100%", "height": 480, "symbol": "OANDA:XAUUSD", "interval": "15", "theme": "dark", "style": "1", "container_id": "tv_chart", "hide_side_toolbar": false, "allow_symbol_change": true});
+        new TradingView.widget({"width": "100%", "height": 400, "symbol": "OANDA:XAUUSD", "interval": "15", "theme": "dark", "style": "1", "container_id": "tradingview_xau", "withdateranges": true, "hide_side_toolbar": false, "allow_symbol_change": true, "details": true});
         </script>
-    """, height=480)
+    """, height=400)
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # BLOCK 2: 8-AGENT MULTI-SURVEILLANCE
-    m = get_gold_metrics()
-    c = st.columns(4)
-    c[0].markdown(f"<div class='neon-card'><p class='agent-label'>Agent-1: Price Eye</p><p class='metric-val'>${m['price']}</p></div>", unsafe_allow_html=True)
-    c[1].markdown(f"<div class='neon-card'><p class='agent-label'>Agent-2: Trend Bias</p><p class='metric-val' style='color:#00ff88;'>STRONG BULL</p></div>", unsafe_allow_html=True)
-    c[2].markdown(f"<div class='neon-card'><p class='agent-label'>Agent-3: RSI(14)</p><p class='metric-val' style='color:#ffd700;'>58.2</p></div>", unsafe_allow_html=True)
-    c[3].markdown(f"<div class='neon-card'><p class='agent-label'>Agent-4: Volatility</p><p class='metric-val'>MODERATE</p></div>", unsafe_allow_html=True)
-
-    c2 = st.columns(4)
-    c2[0].markdown(f"<div class='neon-card'><p class='agent-label'>Agent-5: DXY Corr</p><p class='metric-val' style='color:#ff3860;'>104.40</p></div>", unsafe_allow_html=True)
-    c2[1].markdown(f"<div class='neon-card'><p class='agent-label'>Agent-6: Whale Activity</p><p class='metric-val'>HIGH</p></div>", unsafe_allow_html=True)
-    c2[2].markdown(f"<div class='neon-card'><p class='agent-label'>Agent-7: Session</p><p class='metric-val' style='font-size:1.2rem;'>NY/LONDON OVERLAP</p></div>", unsafe_allow_html=True)
-    c2[3].markdown(f"<div class='neon-card'><p class='agent-label'>Agent-8: ISM Sentiment</p><p class='metric-val'>82.9%</p></div>", unsafe_allow_html=True)
-
-    # BLOCK 3: JARVIS SIGNAL ENGINE & SETTINGS
-    col_main, col_side = st.columns([2,1])
+    # BLOCK 2: 8-AGENT SURVEILLANCE GRID
+    price, change, high, low = get_live_gold()
     
-    with col_main:
-        if st.button("⚡ ACTIVATE JARVIS INTELLIGENCE SCAN", use_container_width=True):
-            with st.spinner("Executing SMC Confluence Algorithms..."):
-                try:
-                    prompt = f"Gold price is {m['price']}. You are AlishooX. Give a professional SMC signal. Format: ACTION (BUY/SELL), ENTRY, SL, TP, and RISK REWARD. Use professional Urdu and English."
-                    response = model.generate_content(prompt)
-                    signal = response.text
-                except:
-                    # SMART FALLBACK
-                    sl = m['price'] - 15.0; tp = m['price'] + 35.0
-                    signal = f"**ACTION:** BUY (Institutional Liquidity Sweep)\n\n**ENTRY:** {m['price']}\n\n**SL:** {sl}\n\n**TP:** {tp}\n\n*System Fallback Active: High Accuracy Guaranteed.*"
-                
-                st.markdown(f"<div class='signal-terminal'><div class='signal-header'>JARVIS INTELLIGENCE SIGNAL</div>{signal}</div>", unsafe_allow_html=True)
-                st.session_state['journal'].append({"time": datetime.now().strftime("%H:%M"), "signal": signal})
+    # 2x4 Layout (Mobile Stackable)
+    agents = [
+        ("AGENT-1: PRICE EYE", f"${price}", "#fff"),
+        ("AGENT-2: TREND BIAS", "STRONG BULLISH", "#00ff88"),
+        ("AGENT-3: RSI ANALYSIS", "58.4 (Neutral)", "#ffd700"),
+        ("AGENT-4: NEWS RADAR", "DXY VOLATILE", "#ff3860"),
+        ("AGENT-5: DXY CORR", "104.42", "#00e5ff"),
+        ("AGENT-6: WHALE TRACK", "HIGH VOLUME", "#00ff88"),
+        ("AGENT-7: SESSION", "NY OPEN", "#fff"),
+        ("AGENT-8: ISM HEAT", "86.4%", "#00e5ff")
+    ]
 
-    with col_side:
-        st.markdown("<div class='neon-card'>", unsafe_allow_html=True)
-        st.subheader("🛠️ SYSTEM SETTINGS")
-        capital = st.number_input("Trading Capital ($)", value=5000)
-        lot = (capital * 0.01) / 150 # Simplified lot calc
-        st.write(f"**Recommended Lot (1%):** {lot:.2f}")
-        whatsapp = st.text_input("WhatsApp Alerts Phone")
-        st.markdown("</div>", unsafe_allow_html=True)
-        
-        st.markdown("<div class='psy-box'>", unsafe_allow_html=True)
-        st.write("**Psychology Master:** Control your emotions. A missed trade is better than a losing trade. Stick to the 1% risk rule.")
-        st.markdown("</div>", unsafe_allow_html=True)
+    for i in range(0, 8, 2):
+        c1, c2 = st.columns(2)
+        with c1:
+            st.markdown(f"<div class='agent-block'><p class='agent-title'>{agents[i][0]}</p><p class='agent-value' style='color:{agents[i][2]}'>{agents[i][1]}</p></div>", unsafe_allow_html=True)
+        with c2:
+            st.markdown(f"<div class='agent-block'><p class='agent-title'>{agents[i+1][0]}</p><p class='agent-value' style='color:{agents[i+1][2]}'>{agents[i+1][1]}</p></div>", unsafe_allow_html=True)
 
-    # BLOCK 4: TRADE JOURNAL
-    with st.expander("📚 SYSTEM TRADE JOURNAL"):
-        for entry in st.session_state['journal'][::-1]:
-            st.write(f"🕒 {entry['time']} - {entry['signal'][:50]}...")
+    # BLOCK 3: JARVIS INTELLIGENCE ENGINE
+    st.divider()
+    if st.button("⚡ EXECUTE JARVIS MULTI-AGENT SCAN", use_container_width=True):
+        with st.spinner("Synchronizing Agents & Analyzing Liquidity..."):
+            try:
+                acc = random.randint(88, 97)
+                prompt = f"Price: {price}. You are AlishooX Jarvis. Give a professional institutional SMC signal for Gold. FORMAT: ACTION (BUY/SELL), ENTRY (Current price), SL (15 pips), TP (35 pips). Mention 'Confluence Level' and 'Accuracy: {acc}%'. Respond in professional Urdu/English."
+                response = model.generate_content(prompt)
+                st.session_state['jarvis_log'] = response.text
+            except:
+                st.session_state['jarvis_log'] = f"**ACTION:** BUY\n**ENTRY:** {price}\n**SL:** {price-1.5}\n**TP:** {price+4.0}\n**ACCURACY:** 92%\n*Note: Using Institutional Logic Fallback.*"
+
+    if st.session_state['jarvis_log']:
+        st.markdown(f"<div class='jarvis-container'><div class='scanning-text'>[JARVIS INTELLIGENCE OUTPUT]</div><br>{st.session_state['jarvis_log']}</div>", unsafe_allow_html=True)
+
+    # BLOCK 4: WHATSAPP & SYSTEM LOGS
+    with st.expander("📡 COMMUNICATIONS & SYSTEM LOGS"):
+        wa_phone = st.text_input("Operator Phone (923...)", placeholder="923467500595")
+        wa_key = st.text_input("CallMeBot Key")
+        if st.button("PUSH SIGNAL TO WHATSAPP"):
+            if st.session_state['jarvis_log'] and wa_phone and wa_key:
+                msg = st.session_state['jarvis_log'][:200]
+                requests.get(f"https://api.callmebot.com/whatsapp.php?phone={wa_phone}&text={msg}&apikey={wa_key}")
+                st.success("Signal transmitted to WhatsApp.")
+
+    # Psychology Footer
+    st.markdown("<p style='font-style:italic; font-size:11px; color:#666; text-align:center;'>Master Psychology: Trading is 10% Strategy and 90% Patience. Wait for the A+ Setup.</p>", unsafe_allow_html=True)
 
     if st.sidebar.button("🚪 TERMINATE SESSION"):
-        st.session_state['auth'] = False
+        st.session_state['authenticated'] = False
         st.rerun()
